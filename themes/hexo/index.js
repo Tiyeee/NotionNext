@@ -368,6 +368,28 @@ const Layout404 = props => {
 const LayoutCategoryIndex = props => {
   const { categoryOptions } = props
   const { locale } = useGlobal()
+  const splitCategoryName = name => {
+    if (!name) return { parent: '', child: '' }
+    const parts = String(name).split('>')
+    if (parts.length === 1) {
+      const parent = parts[0].trim()
+      return { parent, child: '' }
+    }
+    const parent = parts[0].trim()
+    const child = parts.slice(1).join('>').trim()
+    return { parent, child }
+  }
+
+  const groups = {}
+  categoryOptions?.forEach(category => {
+    const { parent, child } = splitCategoryName(category.name)
+    if (!parent) return
+    if (!groups[parent]) {
+      groups[parent] = []
+    }
+    groups[parent].push({ ...category, parent, child })
+  })
+
   return (
     <div className='mt-8'>
       <Card className='w-full min-h-screen'>
@@ -375,21 +397,44 @@ const LayoutCategoryIndex = props => {
           <i className='mr-4 fas fa-th' /> {locale.COMMON.CATEGORY}:
         </div>
         <div id='category-list' className='duration-200 flex flex-wrap mx-8'>
-          {categoryOptions?.map(category => {
+          {Object.entries(groups).map(([parent, children]) => {
+            const parentOnly = children.find(c => !c.child)
+            const childItems = children.filter(c => c.child)
             return (
-              <SmartLink
-                key={category.name}
-                href={`/category/${category.name}`}
-                passHref
-                legacyBehavior>
-                <div
-                  className={
-                    ' duration-300 dark:hover:text-white px-5 cursor-pointer py-2 hover:text-indigo-400'
-                  }>
-                  <i className='mr-4 fas fa-folder' /> {category.name}(
-                  {category.count})
+              <div key={parent} className='w-full mb-2'>
+                <div className='text-base font-semibold text-gray-700 dark:text-gray-200 mb-1'>
+                  {parent}
                 </div>
-              </SmartLink>
+
+                {parentOnly && !childItems.length && (
+                  <SmartLink
+                    key={parentOnly.name}
+                    href={`/category/${parentOnly.name}`}
+                    passHref
+                    legacyBehavior>
+                    <div className='duration-300 dark:hover:text-white px-5 cursor-pointer py-2 hover:text-indigo-400'>
+                      <i className='mr-4 fas fa-folder' /> {parentOnly.name}(
+                      {parentOnly.count})
+                    </div>
+                  </SmartLink>
+                )}
+                {childItems.length > 0 && (
+                  <div className='ml-6'>
+                    {childItems.map(childCat => (
+                      <SmartLink
+                        key={childCat.name}
+                        href={`/category/${childCat.name}`}
+                        passHref
+                        legacyBehavior>
+                        <div className='duration-300 dark:hover:text-white px-5 cursor-pointer py-1 hover:text-indigo-400 text-sm'>
+                          <i className='mr-4 fas fa-folder' /> {childCat.child}(
+                          {childCat.count})
+                        </div>
+                      </SmartLink>
+                    ))}
+                  </div>
+                )}
+              </div>
             )
           })}
         </div>

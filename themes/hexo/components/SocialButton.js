@@ -1,7 +1,7 @@
 import QrCode from '@/components/QrCode'
 import { siteConfig } from '@/lib/config'
 import { useRef, useState } from 'react'
-import { handleEmailClick } from '@/lib/plugins/mailEncrypt'
+import { handleEmailClick, decryptEmail } from '@/lib/plugins/mailEncrypt'
 
 /**
  * 社交联系方式按钮组
@@ -94,15 +94,27 @@ const SocialButton = () => {
           </a>
         )}
         {CONTACT_EMAIL && (
-          <a
-            onClick={e => handleEmailClick(e, emailIcon, CONTACT_EMAIL)}
-            title='email'
-            className='cursor-pointer'
-            ref={emailIcon}>
-            <i className='transform hover:scale-125 duration-150 fas fa-envelope dark:hover:text-indigo-400 hover:text-indigo-600' />
-          </a>
+          <div className='flex items-center space-x-2'>
+            <a
+              onClick={e => handleEmailClick(e, emailIcon, CONTACT_EMAIL)}
+              title='email'
+              className='cursor-pointer'
+              ref={emailIcon}>
+              <i className='transform hover:scale-125 duration-150 fas fa-envelope dark:hover:text-indigo-400 hover:text-indigo-600' />
+            </a>
+            <span className='text-sm'>
+              {decryptEmail(CONTACT_EMAIL)}
+            </span>
+          </div>
         )}
-        {ENABLE_RSS && (
+        {/* {CONTACT_WEHCHAT_PUBLIC && (
+          <div className='flex items-center space-x-2'>
+            <span className='text-sm'>
+              {decryptEmail(CONTACT_WEHCHAT_PUBLIC)}
+            </span>
+          </div>
+        )} */}
+        {/* {CONTACT_RSS && (
           <a
             target='_blank'
             rel='noreferrer'
@@ -110,7 +122,7 @@ const SocialButton = () => {
             href={'/rss/feed.xml'}>
             <i className='transform hover:scale-125 duration-150 fas fa-rss dark:hover:text-indigo-400 hover:text-indigo-600' />
           </a>
-        )}
+        )} */}
         {CONTACT_BILIBILI && (
           <a
             target='_blank'
@@ -162,21 +174,11 @@ const SocialButton = () => {
             onMouseEnter={openPopover}
             onMouseLeave={closePopover}
             aria-label={'微信公众号'}>
-            <div id='wechat-button'>
+            <div id='wechat-button' className='flex items-center space-x-2'>
               <i className='transform scale-105 hover:scale-125 duration-150 fab fa-weixin  dark:hover:text-indigo-400 hover:text-indigo-600' />
-            </div>
-            {/* 二维码弹框 */}
-            <div className='absolute'>
-              <div
-                id='pop'
-                className={
-                  (qrCodeShow ? 'opacity-100 ' : ' invisible opacity-0') +
-                  ' z-40 absolute bottom-10 -left-10 bg-white shadow-xl transition-all duration-200 text-center'
-                }>
-                <div className='p-2 mt-1 w-28 h-28'>
-                  {qrCodeShow && <QrCode value={CONTACT_WEHCHAT_PUBLIC} />}
-                </div>
-              </div>
+              <span className='text-sm'>
+                {decryptEmail(CONTACT_WEHCHAT_PUBLIC)}
+              </span>
             </div>
           </button>
         )}
